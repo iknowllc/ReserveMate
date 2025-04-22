@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reservemate.mapper.ReservationMapper">
+
+
+    <delete id="cancel" parameterType="com.reservemate.pojo.entity.Reservation">
+        UPDATE reservation
+        SET status = 'cancel',
+        update_time = NOW()
+        WHERE user_id = #{userId}
+            AND start_time = #{startTime}
+            AND end_time = #{endTime}
+            AND table_id = #{tableId}
+    </delete>
+
+    <!-- 统计冲突：只考虑 status = 'confirmed' -->
+    <select id="countConflict" resultType="int" parameterType="map">
+        SELECT COUNT(*)
+        FROM reservation
+        WHERE table_id = #{tableId}
+          AND status = 'confirmed'
+          AND NOT (end_time &lt;= #{start} OR start_time &gt;= #{end})
+    </select>
+
+    <!-- 插入新预定 -->
+    <insert id="insert" parameterType="com.reservemate.pojo.entity.Reservation"
+            useGeneratedKeys="true" keyProperty="reservationId">
+        INSERT INTO reservation
+            (user_id, table_id, start_time, end_time, status)
+        VALUES
+            (#{userId}, #{tableId}, #{startTime}, #{endTime}, 'confirmed')
+    </insert>
+
+    <!-- 查询指定日期 & 时段 的已预定 table_id 列表，status = 'confirmed' -->
+    <select id="selectReservedTableIds" resultType="long" parameterType="map">
+        SELECT table_id
+        FROM reservation
+        WHERE DATE(start_time) = #{date}
+          AND status = 'confirmed'
+          AND start_time = #{start}
+    </select>
+
+    <!-- 查询所有需要标记为 completed 的预定ID -->
+    <select id="selectToComplete" resultType="long">
+        SELECT reservation_id
+        FROM reservation
+        WHERE end_time &lt;= NOW()
+          AND status = 'confirmed'
+    </select>
+
+    <!-- 批量标记为 completed -->
+    <update id="batchComplete" parameterType="list">
+        UPDATE reservation
+        SET status = 'completed',
+        update_time = NOW()
+        WHERE reservation_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+
+
+    <!-- 查询某用户所有未取消且未完成（即 confirmed）的预定 -->
+    <select id="selectByUser"
+            resultType="com.reservemate.pojo.entity.Reservation"
+            parameterType="long">
+        SELECT *
+        FROM reservation
+        WHERE user_id = #{userId}
+          AND status = 'confirmed'
+        ORDER BY start_time
+    </select>
+
+</mapper>

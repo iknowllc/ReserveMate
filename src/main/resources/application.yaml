@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: ReserveMate
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  datasource:
+    url: jdbc:mysql://localhost:3306/reservemate?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: 112233
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5               # ???????
+      maximum-pool-size: 10         # ???????
+      idle-timeout: 30000           # ???????????ms?
+      max-lifetime: 1800000         # ??????????ms?
+      connection-timeout: 30000     # ????????????ms?
+      pool-name: HikariCP           # ?????
+  jpa:
+    hibernate:
+      ddl-auto: update              # ???????????????none, update, create, create-drop
+    properties:
+      hibernate:
+        format_sql: true            # ???SQL??
+        show_sql: true              # ??SQL??
+    open-in-view: false             # ????????????????????????
+  sql:
+    init:
+      mode: always                  # ?????????SQL???????????always, embedded, never
+  mail:
+    host: "smtp.139.com"
+    username: "18803705331@139.com"
+    password: "c2c824f5110775bf8200" # 如果启用了双因素认证，使用应用专用密码
+  redis:
+    host: "192.168.81.129"
+    port: 6379
+    database: 0
+    timeout: 2000ms
+    client-type: lettuce
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+jwt:
+  secret-key: "qqweerertsdfscxz"
+  ttl: 360000000000000000 #单位毫秒
+  token-name: "authentication"
+server:
+  port: 8081
+aliyun:
+  oss:
+    endpoint: "oss-cn-beijing.aliyuncs.com"  # 根据你的地域修改
+    accessKeyId: "LTAI5tNcBnm52Yidb7kuPQKK"
+    accessKeySecret: "rXVQKtgC0AUP75292RQ4BtbQ2rGf04"
+    bucketName: "luyo"
+    fileHost: "reserve_mate/image"
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.reservemate.pojo.entity
+
+
